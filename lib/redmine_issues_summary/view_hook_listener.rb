@@ -12,7 +12,7 @@ module IssuesSummary
 			{:estimated => estimated_sum, :spent => spent_sum}
 		end
 		def view_issues_index_bottom(context={})
-			sum = calulate_times(context[:issues])
+			sum = calculate_times(context[:issues])
 			html = '<div class="box" id="issue_sum">'
 			html += <<EOHTML
 			Estimated hours:  #{sum[:estimated]} Spent hours: #{sum[:spent]} <br/>
