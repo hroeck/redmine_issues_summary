@@ -1,0 +1,13 @@
+<table>
+  <tbody>
+    <tr>
+      <th>Time unit: </th>
+      <td>
+		<select name="settings[timeunit]" id=settings_timeunit>
+		<option value='hours' <%= settings['timeunit'] == 'hours' ? 'selected' : '' %> >Hours</option>
+		<option value='days' <%= settings['timeunit'] == 'days' ? 'selected' : '' %> >Days</option>
+		</select>
+	  <td> current value: <%= settings['timeunit'] %>
+    </tr>
+  </tbody>
+</table>
