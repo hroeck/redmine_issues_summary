@@ -28,20 +28,40 @@ module IssuesSummary
 		def view_issues_index_bottom(context={})
 			sum = calculate_times(context[:issues])
 			html = <<EOHTML
-			<div id="issue_summary">
-			<h2>Issue Summary</h2>
-			<table>
+			<div id="issue_summary" style="visibility: hidden">
+			<table class='list issues'>
 			<thead>
-			<tr><th></th><th>#{get_timeunit()}</th></tr>
+			<tr><th></th><th>#{get_timeunit() == 'days' ? 'Days' : 'Hours'}</th></tr>
 			</thead>
 			<tbody>
 			<tr> <td> Estimated </td><td> #{sum[:estimated]}</td></tr>
 			<tr> <td> Spent </td><td> #{sum[:spent]} </td></tr>
-			<tr> <th> Open </th><th> #{sum[:estimated] - sum[:spent]} </th></tr>
+			<tr> <td> Open </td><td> #{sum[:estimated] - sum[:spent]} </td></tr>
 			</tbody>
 			</table>
+			</div>
+			<script type="text/javascript">
+			buttons = document.getElementsByClassName('buttons hide-when-print')[0];
+			buttons.innerHTML = buttons.innerHTML + ' <a class="icon icon-checked" href="#" onclick="show_stats()"> Show Stats </a>'
+			top.summary = null;
+			function show_stats() {
+				if (top.summary == null)
+				{
+					top.summary = document.getElementById('issue_summary');
+				}
+				if (top.summary.style.visibility == 'hidden')
+				{
+					document.getElementsByClassName('buttons hide-when-print')[0].appendChild(top.summary);
+					top.summary.style.visibility = 'visible';
+				} 
+				else
+				{
+					document.getElementsByClassName('buttons hide-when-print')[0].removeChild(top.summary);
+					top.summary.style.visibility = 'hidden';
+				}
+		    }
+			</script>
 EOHTML
-			html += '</div>'
 		end
 	end
 end
