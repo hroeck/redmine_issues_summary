@@ -17,7 +17,7 @@ module IssuesSummary
 				end
 				spent_sum = spent_sum + issue.spent_hours
 			end
-			if get_timeunit == 'days'
+			if get_timeunit() == 'days'
 				estimated_sum = estimated_sum/8
 				spent_sum = spent_sum/8
 			end
@@ -27,12 +27,21 @@ module IssuesSummary
 		# Redmine Hook: context contains issues, project and query
 		def view_issues_index_bottom(context={})
 			sum = calculate_times(context[:issues])
-			html = '<div class="box" id="issue_sum">'
-			html += <<EOHTML
-			Estimated #{get_timeunit()}:  #{sum[:estimated]} Spent #{get_timeunit()}: #{sum[:spent]} <br/>
-			<p> 
+			html = <<EOHTML
+			<div id="issue_summary">
+			<h2>Issue Summary</h2>
+			<table>
+			<thead>
+			<tr><th></th><th>#{get_timeunit()}</th></tr>
+			</thead>
+			<tbody>
+			<tr> <td> Estimated </td><td> #{sum[:estimated]}</td></tr>
+			<tr> <td> Spent </td><td> #{sum[:spent]} </td></tr>
+			<tr> <th> Open </th><th> #{sum[:estimated] - sum[:spent]} </th></tr>
+			</tbody>
+			</table>
 EOHTML
-			html += '</div><p>'
+			html += '</div>'
 		end
 	end
 end
