@@ -28,7 +28,9 @@ module IssuesSummary
 		def view_issues_index_bottom(context={})
 			sum = calculate_times(context[:issues])
 			html = <<EOHTML
-			<div id="issue_summary" style="visibility: hidden">
+			<fieldset id="issue_summary" class="collapsible collapsed">
+			<legend onclick="toggleFieldset(this);">Stats</legend>
+			<div style="display: none;">
 			<table class='list issues'>
 			<thead>
 			<tr><th></th><th>#{get_timeunit() == 'days' ? 'Days' : 'Hours'}</th></tr>
@@ -40,26 +42,9 @@ module IssuesSummary
 			</tbody>
 			</table>
 			</div>
+			</fieldset>
 			<script type="text/javascript">
-			buttons = document.getElementsByClassName('buttons hide-when-print')[0];
-			buttons.innerHTML = buttons.innerHTML + ' <a class="icon icon-checked" href="#" onclick="show_stats()"> Show Stats </a>'
-			top.summary = null;
-			function show_stats() {
-				if (top.summary == null)
-				{
-					top.summary = document.getElementById('issue_summary');
-				}
-				if (top.summary.style.visibility == 'hidden')
-				{
-					document.getElementsByClassName('buttons hide-when-print')[0].appendChild(top.summary);
-					top.summary.style.visibility = 'visible';
-				} 
-				else
-				{
-					document.getElementsByClassName('buttons hide-when-print')[0].removeChild(top.summary);
-					top.summary.style.visibility = 'hidden';
-				}
-		    }
+			document.getElementById("query_form_content").appendChild(document.getElementById('issue_summary'));
 			</script>
 EOHTML
 		end
