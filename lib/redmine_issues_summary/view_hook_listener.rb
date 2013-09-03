@@ -19,12 +19,20 @@ module IssuesSummary
 			return get_timeunit() == 'days' ? 'Days' : 'Hours'
 		end
 
+		def sort_stats(stats)
+			sorted = {}
+			stats.keys.sort.each do |k|
+				sorted[k] = stats[k]
+			end
+			return sorted
+		end
+
 		def calc_stats(issues)
 			stats = Hash.new({:estimates => 0.0, :spent => 0.0, :issues => 0})
 			issues.each do |issue|
-				version = "none"
+				version = ' '
 				if issue.fixed_version
-					version = issue.fixed_version
+					version = issue.fixed_version.to_s
 				end
 				estimate = stats[version][:estimates] 
 				if issue.estimated_hours && issue.leaves.count == 0
@@ -34,7 +42,10 @@ module IssuesSummary
 				issues = stats[version][:issues]
 				stats[version] = {:estimates => estimate, :spent => spent, :issues => issues + 1}
 			end
+			return sort_stats(stats)
+		end
 
+		def add_sum(stats)
 			sums = {:estimates => 0.0, :spent => 0.0, :issues => 0}
 			stats.values.each do  |s| 
 				sums[:issues] = sums[:issues] + s[:issues] 
@@ -42,13 +53,17 @@ module IssuesSummary
 				sums[:spent] = sums[:spent] + s[:spent] 
 			end
 			stats["Sum"] = sums
-
-			return stats
 		end
+
 
 		# Redmine Hook: context contains issues, project and query
 		def view_issues_index_bottom(context={})
 			stats = calc_stats(context[:issues])
+			add_sum(stats)
+			render_html(stats)
+		end
+
+		def render_html(stats)
 			html = <<EOHTML
 			<fieldset id="issue_summary" class="collapsible collapsed">
 			<legend onclick="toggleFieldset(this);">Stats</legend>
