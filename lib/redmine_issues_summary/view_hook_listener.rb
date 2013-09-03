@@ -34,6 +34,15 @@ module IssuesSummary
 				issues = stats[version][:issues]
 				stats[version] = {:estimates => estimate, :spent => spent, :issues => issues + 1}
 			end
+
+			sums = {:estimates => 0.0, :spent => 0.0, :issues => 0}
+			stats.values.each do  |s| 
+				sums[:issues] = sums[:issues] + s[:issues] 
+				sums[:estimates] = sums[:estimates] + s[:estimates] 
+				sums[:spent] = sums[:spent] + s[:spent] 
+			end
+			stats["Sum"] = sums
+
 			return stats
 		end
 
@@ -66,6 +75,7 @@ EOHTML
 				</tr>
 EOHTML
 			end
+
 			html += <<EOHTML
 			</tbody>
 			</table>
