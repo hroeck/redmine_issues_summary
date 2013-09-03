@@ -8,37 +8,65 @@ module IssuesSummary
 			return unit
 		end
 
-		def calculate_times(issues)
-			estimated_sum = 0.0
-			spent_sum = 0.0
-			issues.each do |issue|
-				if issue.estimated_hours && issue.leaves.count == 0
-					estimated_sum = estimated_sum + issue.estimated_hours 
-				end
-				spent_sum = spent_sum + issue.spent_hours
-			end
+		def get_divisor()
 			if get_timeunit() == 'days'
-				estimated_sum = estimated_sum/8
-				spent_sum = spent_sum/8
+				return 8
 			end
-			{:estimated => estimated_sum, :spent => spent_sum}
+			return 1
+		end
+
+		def get_timeunit_name()
+			return get_timeunit() == 'days' ? 'Days' : 'Hours'
+		end
+
+		def calc_stats(issues)
+			stats = Hash.new({:estimates => 0.0, :spent => 0.0, :issues => 0})
+			issues.each do |issue|
+				version = "none"
+				if issue.fixed_version
+					version = issue.fixed_version
+				end
+				estimate = stats[version][:estimates] 
+				if issue.estimated_hours && issue.leaves.count == 0
+					estimate = estimate + issue.estimated_hours/get_divisor()
+				end
+				spent = stats[version][:spent] + issue.spent_hours/get_divisor()
+				issues = stats[version][:issues]
+				stats[version] = {:estimates => estimate, :spent => spent, :issues => issues + 1}
+			end
+			return stats
 		end
 
 		# Redmine Hook: context contains issues, project and query
 		def view_issues_index_bottom(context={})
-			sum = calculate_times(context[:issues])
+			stats = calc_stats(context[:issues])
 			html = <<EOHTML
 			<fieldset id="issue_summary" class="collapsible collapsed">
 			<legend onclick="toggleFieldset(this);">Stats</legend>
 			<div style="display: none;">
 			<table class='list issues'>
 			<thead>
-			<tr><th></th><th>#{get_timeunit() == 'days' ? 'Days' : 'Hours'}</th></tr>
+			<tr><th>Version</th>
+				<th>Num Issues</th>
+				<th>Estimated #{get_timeunit_name()}</th>
+				<th>Spent #{get_timeunit_name()}</th>
+				<th>Open #{get_timeunit_name()}</th>
+			</tr>
 			</thead>
 			<tbody>
-			<tr> <td> Estimated </td><td> #{sum[:estimated]}</td></tr>
-			<tr> <td> Spent </td><td> #{sum[:spent]} </td></tr>
-			<tr> <td> Open </td><td> #{sum[:estimated] - sum[:spent]} </td></tr>
+EOHTML
+			stats.each do |version, stat|
+				html += <<EOHTML
+				<tr> 
+				<td> #{version} </td>
+				<td> #{stat[:issues]} </td>
+				<td> #{stat[:estimates].round(3)} </td>
+				<td> #{stat[:spent].round(3)}</td>
+				<td> #{(stat[:estimates] - stat[:spent]).round(3)}</td>
+				</tr>
+EOHTML
+			end
+			html += <<EOHTML
 			</tbody>
 			</table>
 			</div>
