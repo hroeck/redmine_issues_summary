@@ -55,14 +55,6 @@ module IssuesSummary
 			stats["Sum"] = sums
 		end
 
-
-		# Redmine Hook: context contains issues, project and query
-		def view_issues_index_bottom(context={})
-			stats = calc_stats(context[:issues])
-			add_sum(stats)
-			render_html(stats)
-		end
-
 		def render_html(stats)
 			html = <<EOHTML
 			<fieldset id="issue_summary" class="collapsible collapsed">
@@ -100,6 +92,13 @@ EOHTML
 			document.getElementById("query_form_content").appendChild(document.getElementById('issue_summary'));
 			</script>
 EOHTML
+		end
+
+		# Redmine Hook: context contains issues, project and query
+		def view_issues_index_bottom(context={})
+			stats = calc_stats(context[:issues])
+			add_sum(stats)
+			render_html(stats)
 		end
 	end
 end
