@@ -19,14 +19,6 @@ module IssuesSummary
 			return get_timeunit() == 'days' ? 'Days' : 'Hours'
 		end
 
-		def sort_stats(stats)
-			sorted = {}
-			stats.keys.sort.each do |k|
-				sorted[k] = stats[k]
-			end
-			return sorted
-		end
-
 		def calc_stats(issues)
 			stats = Hash.new({:estimates => 0.0, :spent => 0.0, :issues => 0})
 			issues.each do |issue|
@@ -42,7 +34,7 @@ module IssuesSummary
 				issues = stats[version][:issues]
 				stats[version] = {:estimates => estimate, :spent => spent, :issues => issues + 1}
 			end
-			return sort_stats(stats)
+			return stats
 		end
 
 		def add_sum(stats)
@@ -53,6 +45,19 @@ module IssuesSummary
 				sums[:spent] = sums[:spent] + s[:spent] 
 			end
 			stats["Sum"] = sums
+		end
+
+		def render_stat_row(version, stat)
+			html = <<EOHTML
+			<tr> 
+			<td> #{version} </td>
+			<td> #{stat[:issues]} </td>
+			<td> #{stat[:estimates].round(3)} </td>
+			<td> #{stat[:spent].round(3)}</td>
+			<td> #{(stat[:estimates] - stat[:spent]).round(3)}</td>
+			</tr>
+EOHTML
+			return html
 		end
 
 		def render_html(stats)
@@ -71,17 +76,12 @@ module IssuesSummary
 			</thead>
 			<tbody>
 EOHTML
-			stats.each do |version, stat|
-				html += <<EOHTML
-				<tr> 
-				<td> #{version} </td>
-				<td> #{stat[:issues]} </td>
-				<td> #{stat[:estimates].round(3)} </td>
-				<td> #{stat[:spent].round(3)}</td>
-				<td> #{(stat[:estimates] - stat[:spent]).round(3)}</td>
-				</tr>
-EOHTML
+			stats.keys.sort.each do |k|
+				if k != "Sum"
+					html += render_stat_row(k, stats[k])
+				end
 			end
+			html += render_stat_row("Sum", stats["Sum"])
 
 			html += <<EOHTML
 			</tbody>
